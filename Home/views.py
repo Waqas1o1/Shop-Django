@@ -2,7 +2,6 @@ from django.shortcuts import render
 from .models import Product,Item,Promotions,TimeDeal
 # Create your views here.
 def Home(request):
-
     # Hole Products
     products = Product.objects.all()
 
