@@ -5,6 +5,9 @@ from django.contrib.auth import authenticate,login,logout
 from django.contrib import messages
 import re 
 from django.db import IntegrityError
+from django.core.mail import send_mail
+from django.core.mail import EmailMultiAlternatives
+from django.template.loader import get_template
 # Create your views here.
 def Index(request):
     return render(request,'account/login.html')
@@ -62,14 +65,11 @@ def Contact_Us(request):
         comment = request.POST['comment']
         import re 
         error = False
-        print(name)
-        print(email)
-        print(comment)
         email_f = '^[a-z0-9]+[\._]?[a-z0-9]+[@]\w+[.]\w{2,3}$'
         if not re.search(email_f,email):
             messages.add_message(request,messages.ERROR,'Email is not valid')
             error = True
-        if len(comment) < 20:
+        if len(comment) < 10:
             messages.add_message(request,messages.ERROR,'Message is to short')
             error = True
         if len(name) < 3:
@@ -79,5 +79,21 @@ def Contact_Us(request):
             return render(request,'account/contact.html')
         contact = ContactUs(name=name,email=email,comment=comment)
         contact.save()
+        # send_mail(
+        # 'Testing',
+        # 'Hi iam here Farhan .',
+        # 'waqasdevolper@gmail.com',
+        # [email],
+        # fail_silently=False,
+        # )
+        plaintext = get_template('email/send.html')
+        htmly  = get_template('email/send.html')
+        d = {'sender_name':name}
+        subject, from_email, to = 'Registration', 'waqasdevolper@gmail.com', email
+        text_content = plaintext.render(d)
+        html_content = htmly.render(d)
+        msg = EmailMultiAlternatives(subject, text_content, from_email, [to])
+        msg.attach_alternative(html_content, "text/html")
+        msg.send()
         messages.add_message(request,messages.INFO,'We will conatct u soon')
     return render(request,'account/contact.html')
